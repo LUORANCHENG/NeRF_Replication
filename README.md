@@ -20,17 +20,38 @@ https://github.com/NVlabs/instant-ngp
 
 ## 配置环境
 
+首先，请确保你的电脑正确安装了CUDA
+
+然后，按照下面的指令配置虚拟环境
+
 ```
-conda create -n nerf python=3.9
-conda activate nerf
-pip install -r requirements.txt
+$ conda create -n nerf python=3.9
+$ conda activate nerf
+$ pip install -r requirements.txt
 ```
 
 ## 数据集下载
 
 在浏览器打开```http://cseweb.ucsd.edu/~viscomp/projects/LF/papers/ECCV20/nerf/nerf_example_data.zip```下载数据集
 
-把下载好的数据集解压，然后把nerf_synthetic文件夹放到data目录下。
+把下载好的数据集解压，然后把nerf_synthetic文件夹放到data目录下。该数据集提供了一个乐高积木的不同角度图像和对应的相机位姿数据，用于NeRF进行训练。
+
+## 训练NeRF
+
+在项目根目录执行下面的命令开始训练NeRF
+
+```
+python train_NeRF --dataset_root ./data/nerf_synthetic/lego --transforms_file transforms_train.json
+```
+其中：
+
+- --dataset_root为数据集目录
+- --transforms_file为相机位姿数据文件
+
+## 使用训练好的模型进行推理
+
+训练好的模型会保存在项目根目录下的ckpt文件夹下
+
 
 
 
