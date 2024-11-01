@@ -1,4 +1,6 @@
 # NeRF_Replication
+## 配置环境
+
 
 
 ## 从问题驱动的角度对NeRf论文进行解读
