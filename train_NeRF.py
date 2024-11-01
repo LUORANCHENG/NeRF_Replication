@@ -1,7 +1,6 @@
 
-
+import argparse
 import torch
-
 from utils import DatasetProvider, NeRFDataset, NeRF, render_rays
 import numpy as np
 import torch.optim as optim
@@ -98,13 +97,20 @@ def train():
 
 
 if __name__ == '__main__':
+    # 获取参数
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset_root", default="data/nerf_synthetic/lego", type=str, help="dataset_root")
+    parser.add_argument("--transforms_file", default="transforms_train.json", type=str, help="transforms_file_name")
+    parser.add_argument("--device", default="cuda", type=str, help="cpu or cuda")
+    args = parser.parse_args()
+
     # 数据集目录
     # root = "data/nerf_synthetic/lego"
-    root = "data/mydata"
+    root = args.dataset_root
 
     # 相机数据名称
     # transforms_file = "transforms_train.json"
-    transforms_file = "transforms.json"
+    transforms_file = args.transforms_file
 
 
     os.makedirs("imgs",      exist_ok=True)
@@ -120,7 +126,7 @@ if __name__ == '__main__':
 
     # 根据前面的provider初始化nerf数据集
     batch_size = 1024
-    device = 'cuda'
+    device = args.device
     trainset = NeRFDataset(provider, batch_size, device)
 
 
