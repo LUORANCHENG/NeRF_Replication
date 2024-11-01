@@ -63,8 +63,22 @@ python make_video.py --ckpt ckpt/100000.pth --data_path "data/nerf_synthetic/leg
 - --transforms_file为相机位姿数据路径
 
 ## 使用自己的数据集进行训练
+下载并安装colmap，这个是用来估计相机位姿的：[colmap下载地址](https://demuc.de/colmap/#download)
 
+首先使用自己的设备(手机和相机都行)围绕目标物体拍摄时长大约1分钟的视频，帧数建议选30帧，视频格式建议为```.mp4```
 
+然后使用项目根目录下的```video2img.py```脚本将视频分解为一张张图像
+```
+python video2img --video_path 视频路径 --output_dir 输出路径
+```
+
+下一步我们需要使用[instant-ngp](https://github.com/NVlabs/instant-ngp)中的```colmap2nerf.py```来估计相机姿态数据：
+
+[instant-ngp源码](https://github.com/NVlabs/instant-ngp)
+
+```
+
+```
 
 
 ## 从问题驱动的角度对NeRf论文进行解读
