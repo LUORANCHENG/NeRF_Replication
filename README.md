@@ -1,6 +1,6 @@
 # NeRF_Replication
 
-本仓库是将大佬的工作自己重新实现了一遍，以加深理解
+本仓库是将大佬原有的工作自己重新实现了一遍，以加深理解
 
 ## 参考项目
 https://github.com/yenchenlin/nerf-pytorch
