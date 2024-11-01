@@ -38,21 +38,21 @@ $ pip install -r requirements.txt
 
 ## 训练NeRF
 
-在项目根目录执行下面的命令开始训练NeRF
+在项目根目录执行``train_NeRF.py```开始训练NeRF
 
 ```
-python train_NeRF --dataset_root ./data/nerf_synthetic/lego --transforms_file transforms_train.json
+python train_NeRF.py --dataset_root ./data/nerf_synthetic/lego --transforms_file transforms_train.json
 ```
 其中：
 
-- --dataset_root为数据集目录
-- --transforms_file为相机位姿数据文件
+- --dataset_root为数据集目录路径
+- --transforms_file为相机位姿数据文件路径
 
 ## 使用训练好的模型进行推理
 
 训练好的模型会保存在项目根目录下的ckpt文件夹下
 
-在项目的根目录执行下面的命令进行推理：
+在项目的根目录执行```make_video.py```进行推理：此脚本会在```rotate360```文件夹下生成重建物体360度的不同视角图，然后在```videos```文件夹下将不同的视角图拼接成视频
 ```
 python make_video.py --ckpt ckpt/100000.pth --data_path "data/nerf_synthetic/lego" --transforms_file transforms_train.json
 ```
@@ -60,7 +60,9 @@ python make_video.py --ckpt ckpt/100000.pth --data_path "data/nerf_synthetic/leg
 
 - --ckpt为模型路径
 - --data_path为数据集路径
-- --transforms_file为相机位姿数据
+- --transforms_file为相机位姿数据路径
+
+## 使用自己的数据集进行训练
 
 
 ## 从问题驱动的角度对NeRf论文进行解读
