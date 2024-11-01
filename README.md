@@ -32,7 +32,7 @@ pip install -r requirements.txt
 
 把下载好的数据集解压，然后把nerf_synthetic文件夹放到data目录下。
 
-剩下的我有空再写😀
+
 
 ## 从问题驱动的角度对NeRf论文进行解读
 
