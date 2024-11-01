@@ -65,6 +65,8 @@ python make_video.py --ckpt ckpt/100000.pth --data_path "data/nerf_synthetic/leg
 ## 使用自己的数据集进行训练
 
 
+
+
 ## 从问题驱动的角度对NeRf论文进行解读
 
 通读整篇NeRF论文，我们可以发现整个NeRF模型的结构如下：
