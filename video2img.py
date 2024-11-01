@@ -1,5 +1,7 @@
 import cv2
 import os
+import argparse
+
 
 def video_to_images(video_path, output_dir):
     # 检查输出目录是否存在，不存在则创建
@@ -41,7 +43,14 @@ def video_to_images(video_path, output_dir):
     cap.release()
     print(f"提取完成，图像保存在: {output_dir}")
 
-# 使用示例
-video_path = "data/mydata//cat.mp4"  # 替换为你的视频路径
-output_dir = "data/mydata/images"           # 替换为你希望保存图像的路径
-video_to_images(video_path, output_dir)
+if __name__ == '__main__':
+    # 获取参数
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--video_path", default="", type=str, help="video_path")
+    parser.add_argument("--output_dir", default="", type=str, help="output_dir")
+    args = parser.parse_args()
+
+    # 使用示例
+    video_path = args.video_path
+    output_dir = args.output_dir
+    video_to_images(video_path, output_dir)
