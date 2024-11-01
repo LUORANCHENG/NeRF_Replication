@@ -17,9 +17,9 @@ NeRF模型结构：
 
 那么我们现在就遇到一些疑问：
 
-<div style="text-align: center"><strong>问题1：如何从一张图片转换为一个5D的向量？ </strong></div>
+<div style="text-align: center"><strong>问题1：我们输入模型的不应该是一张张2D的图像吗，为什么输入的是5D的向量？ </strong></div>
 
-<div style="text-align: center"><strong>问题2：如何把输出的4D向量转换为2D图像？ </strong></div>
+<div style="text-align: center"><strong>问题2：模型输出的不应该是一张张2D的图像吗，为什么输出的是4D的向量？ </strong></div>
 
 为了解答这两个问题：我们猜测会有一个从图像转为5D向量的预处理过程。同样的，也会有一个把输出的4D图像转换为2D图像的后过程。
 
