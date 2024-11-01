@@ -52,7 +52,15 @@ python train_NeRF --dataset_root ./data/nerf_synthetic/lego --transforms_file tr
 
 训练好的模型会保存在项目根目录下的ckpt文件夹下
 
+在项目的根目录执行下面的命令进行推理：
+```
+python make_video.py --ckpt ckpt/100000.pth --data_path "data/nerf_synthetic/lego" --transforms_file transforms_train.json
+```
+其中：
 
+- --ckpt为模型路径
+- --data_path为数据集路径
+- --transforms_file为相机位姿数据
 
 
 ## 从问题驱动的角度对NeRf论文进行解读
