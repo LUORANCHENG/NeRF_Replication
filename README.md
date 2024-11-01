@@ -1,7 +1,27 @@
 # NeRF_Replication
+
+本仓库是将大佬的工作自己重新实现了一遍，以加深理解
+
+## 参考项目
+https://github.com/yenchenlin/nerf-pytorch
+
+https://github.com/bmild/nerf
+
+[【较真系列】讲人话-NeRF全解（原理+代码+公式）](https://www.bilibili.com/video/BV1CC411V7oq/?spm_id_from=333.337.search-card.all.click&vd_source=1a02178b1644ddc9b579739c3c1616b4)
+
+[手写Nerf](https://www.bilibili.com/video/BV1xL411y7Qa/?vd_source=1a02178b1644ddc9b579739c3c1616b4)
+
+[NeRF论文的地址](https://arxiv.org/abs/2003.08934)
+
+
+
 ## 配置环境
 
-
+```
+conda create -n nerf python=3.9
+conda activate nerf
+pip install -r requirements.txt
+```
 
 ## 从问题驱动的角度对NeRf论文进行解读
 
