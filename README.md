@@ -30,7 +30,7 @@ pip install -r requirements.txt
 
 在浏览器打开```http://cseweb.ucsd.edu/~viscomp/projects/LF/papers/ECCV20/nerf/nerf_example_data.zip```下载数据集
 
-把下载好的数据集解压并放到data目录下
+把下载好的数据集解压，然后把nerf_synthetic文件夹放到data目录下
 
 ## 从问题驱动的角度对NeRf论文进行解读
 
