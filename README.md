@@ -27,6 +27,8 @@ https://github.com/NVlabs/instant-ngp
 然后，按照下面的指令配置虚拟环境
 
 ```
+$ git clone https://github.com/LUORANCHENG/NeRF_Replication.git
+$ cd NeRF_Replication
 $ conda create -n nerf python=3.9
 $ conda activate nerf
 $ pip install -r requirements.txt
