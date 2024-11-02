@@ -6,7 +6,6 @@ import imageio
 import numpy as np
 import torch
 import torch.nn as nn
-from caffe2.perfkernels.hp_emblookup_codegen import suffix
 
 
 # -------------------------------------------------------------图像以及相机数据集初始化---------------------------------------------------------
