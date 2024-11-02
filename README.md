@@ -73,7 +73,7 @@ python make_video.py --ckpt ckpt/100000.pth --data_path "data/nerf_synthetic/leg
 
 然后使用项目根目录下的```video2img.py```脚本将视频分解为一张张图像
 ```
-python video2img --video_path 视频路径 --output_dir 输出路径 --scale_factor 0.25
+python video2img.py --video_path 视频路径 --output_dir 输出路径 --scale_factor 0.25
 ```
 其中：
 
