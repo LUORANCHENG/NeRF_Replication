@@ -71,8 +71,11 @@ python make_video.py --ckpt ckpt/100000.pth --data_path "data/nerf_synthetic/leg
 
 然后使用项目根目录下的```video2img.py```脚本将视频分解为一张张图像
 ```
-python video2img --video_path 视频路径 --output_dir 输出路径
+python video2img --video_path 视频路径 --output_dir 输出路径 --scale_factor 0.25
 ```
+其中：
+
+- --scale_factor表示缩放倍数，0.25表示将图片等比例缩小4倍。
 
 ### 使用图片来估算相机位姿
 下载并安装colmap，这个是用来估计相机位姿的：[colmap下载地址](https://demuc.de/colmap/#download)

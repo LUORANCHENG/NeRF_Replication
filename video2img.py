@@ -48,7 +48,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--video_path", default="", type=str, help="video_path")
     parser.add_argument("--output_dir", default="", type=str, help="output_dir")
-    parser.add_argument("--scale_factor", default="", type=float, help="output_dir")
+    parser.add_argument("--scale_factor", default=0.25, type=float, help="output_dir")
     args = parser.parse_args()
 
     # 使用示例
