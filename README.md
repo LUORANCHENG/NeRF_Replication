@@ -15,6 +15,8 @@ https://github.com/NVlabs/instant-ngp
 
 [NeRF论文的地址](https://arxiv.org/abs/2003.08934)
 
+[MipNerf 从0开始搭建到训练自己的数据集](https://blog.csdn.net/Faith_Plus/article/details/134123188?spm=1001.2014.3001.5506)
+
 
 
 
@@ -63,21 +65,36 @@ python make_video.py --ckpt ckpt/100000.pth --data_path "data/nerf_synthetic/leg
 - --transforms_file为相机位姿数据路径
 
 ## 使用自己的数据集进行训练
-下载并安装colmap，这个是用来估计相机位姿的：[colmap下载地址](https://demuc.de/colmap/#download)
 
-首先使用自己的设备(手机和相机都行)围绕目标物体拍摄时长大约1分钟的视频，帧数建议选30帧，视频格式建议为```.mp4```
+### 将视频分割成图片
+使用自己的设备(手机和相机都行)围绕目标物体拍摄时长大约1分钟的视频，帧数建议选30帧，视频格式建议为```.mp4```
 
 然后使用项目根目录下的```video2img.py```脚本将视频分解为一张张图像
 ```
 python video2img --video_path 视频路径 --output_dir 输出路径
 ```
 
+### 使用图片来估算相机位姿
+下载并安装colmap，这个是用来估计相机位姿的：[colmap下载地址](https://demuc.de/colmap/#download)
+
 下一步我们需要使用[instant-ngp](https://github.com/NVlabs/instant-ngp)中的```colmap2nerf.py```来估计相机姿态数据：
 
-[instant-ngp源码](https://github.com/NVlabs/instant-ngp)
+[instant-ngp源码](https://github.com/NVlabs/instant-ngp)，下载成功后，在终端输入以下指令
 
 ```
+$ conda create -n ngp -y python=3.9
+$ conda activate ngp
+$ pip install -r requirements.txt
+```
+配置好ngp的环境后需要使用函数```colmap2nerf.py```来估算相机的位姿数据
+```
+python scripts/colmap2nerf.py --colmap_matcher exhaustive --run_colmap --aabb_scale 16 --colmap_camera_model SIMPLE_PINHOLE --images [图片路径]
+```
+最后会在根目录下生成一个```transforms.json```文件，把这个文件移动到自己的数据集目录下
 
+### 开始训练
+```
+python train_NeRF.py --dataset_root 数据集路径 --transforms_file transforms.json
 ```
 
 
@@ -87,9 +104,9 @@ python video2img --video_path 视频路径 --output_dir 输出路径
 
 NeRF模型结构：
 
-- 输入：5D向量(x, y, z, theta, phi)
+- 输入：5D向量(x， y， z， theta， phi)
 
-- 输出：4D向量(密度, 颜色)
+- 输出：4D向量(密度， 颜色)
 
 - 模型：8层MLP
 
@@ -105,7 +122,7 @@ NeRF模型结构：
 
 首先，我们先来了解一下这个输入的5D向量和输出的4D向量：
 
-输入的5D向量实际上是粒子的空间位姿(x, y, z, theta, phi)
+输入的5D向量实际上是粒子的空间位姿(x， y， z， theta， phi)
 
 输出的4D向量实际上是粒子对应的颜色以及密度。
 
@@ -113,7 +130,7 @@ NeRF模型结构：
 
 看到这里，我们又遇到了另一个问题：
 <div style="text-align: center"><strong>问题3：这个粒子又是什么东西？ </strong></div>
-回答：粒子是某一条光线上的发光点，其属性有x, y, z和颜色，一条光线上可能会含有多个粒子，对于图片上的某一像素(u, v)的颜色可以看作是沿着某一条光线上无数个粒子的和。
+回答：粒子是某一条光线上的发光点，其属性有x， y， z和颜色，一条光线上可能会含有多个粒子，对于图片上的某一像素(u， v)的颜色可以看作是沿着某一条光线上无数个粒子的和。
 
 ---
 
@@ -123,13 +140,13 @@ NeRF模型结构：
 
 我们主要会用到三个坐标系：
 
-世界坐标系：对应下图中的 $\( X_{w}, Y_{w}, Z_{w} \)$
+世界坐标系：对应下图中的 $\( X_{w}， Y_{w}， Z_{w} \)$
 
-相机坐标系：对应下图中的 $\( X_{c}, Y_{c}, Z_{c} \)$
+相机坐标系：对应下图中的 $\( X_{c}， Y_{c}， Z_{c} \)$
 
-归一化相机坐标系：对应下图中的 $\( X_{n}, Y_{n} \)$
+归一化相机坐标系：对应下图中的 $\( X_{n}， Y_{n} \)$
 
-像素坐标系：对应下图中的 $\( U, V \)$
+像素坐标系：对应下图中的 $\( U， V \)$
 
 ![clipboard_2024-10-27_10-41](https://github.com/user-attachments/assets/e85b5d96-d544-42be-8712-e62464e1ab23)
 
@@ -139,76 +156,76 @@ NeRF模型结构：
 
 ![clipboard_2024-10-27_10-54](https://github.com/user-attachments/assets/0ef29dcc-f04f-4f93-bb20-26d5b4583421)
 
-最后，我们用 $\( x_{w}, y_{w}, z_{w} \)$ 表示光线在世界坐标系下的方向，用C2W矩阵的最后一列的前三个数表示光线的原点。
+最后，我们用 $\( x_{w}， y_{w}， z_{w} \)$ 表示光线在世界坐标系下的方向，用C2W矩阵的最后一列的前三个数表示光线的原点。
 
-然后整张图像的shape为H * W，每个像素点都有一条光线，所以一共会有H * W条光线，所以最后d的shape为 $\ (H * W, 3) \$，o的shape也为 $\ (H * W, 3) \$。
+然后整张图像的shape为H * W，每个像素点都有一条光线，所以一共会有H * W条光线，所以最后d的shape为 $\ (H * W， 3) \$，o的shape也为 $\ (H * W， 3) \$。
 
-但是在实际过程中，我们会选取batch_size条光线进行处理，所以实际上d的shape为 $\ (batch size, 3) \$, o的shape为 $\ (batch size, 3) \$。
+但是在实际过程中，我们会选取batch_size条光线进行处理，所以实际上d的shape为 $\ (batch size， 3) \$， o的shape为 $\ (batch size， 3) \$。
 
 到现在为止，我们已经确定了o和d，下面我们来看一下t是怎么确定的：
 
-理论上：t从0到 $\infty$的,是连续的
+理论上：t从0到 $\infty$的，是连续的
 
 实际上:t在计算处理的时候是离散的
 
-方法:分别设置两个变量near=2和far=6,在near和far之间均匀采样64个点,记作pts,shape为(1024, 64, 3) 
+方法:分别设置两个变量near=2和far=6，在near和far之间均匀采样64个点，记作pts，shape为(1024， 64， 3) 
 
 这个pts就是我们前面所说的**粒子**
 
-最后再拼接上前面的到的光线方向d(1024, 3),拼接成6D的向量输入到模型中(所以实际传入的不是5D向量,而是6D的向量!)
+最后再拼接上前面的到的光线方向d(1024， 3)，拼接成6D的向量输入到模型中(所以实际传入的不是5D向量，而是6D的向量!)
 
-到这里,我们就可以回答问题3和问题4和问题1了
+到这里，我们就可以回答问题3和问题4和问题1了
 
 ---
 
-我们看到这里,又会遇到一个新的问题,我们从下面的模型结构图中可以看到,输入模型的分别是一个60维的向量和一个24维的向量,如下图所示:
+我们看到这里，又会遇到一个新的问题，我们从下面的模型结构图中可以看到，输入模型的分别是一个60维的向量和一个24维的向量，如下图所示:
 
 ![clipboard_2024-10-27_14-27](https://github.com/user-attachments/assets/c26f7df5-f62f-421e-81cb-074ef8478d42)
 
-<div style="text-align: center"><strong>问题5：根据我们前面所说的,模型的输入应该是pts(BatchSize, 64, 3)和ray_d(BatchSize, 3),但是模型实际输入的是一个60维的向量和一个24维的向量,这是为什么？ </strong></div>
+<div style="text-align: center"><strong>问题5：根据我们前面所说的，模型的输入应该是pts(BatchSize， 64， 3)和ray_d(BatchSize， 3)，但是模型实际输入的是一个60维的向量和一个24维的向量，这是为什么？ </strong></div>
 
-回答:作者通过实验发现,当只输入粒子的3D位置和3D视角时,建模结果会丢失细节,原因是缺乏高频信息.
+回答:作者通过实验发现，当只输入粒子的3D位置和3D视角时，建模结果会丢失细节，原因是缺乏高频信息.
 
 ![clipboard_2024-10-27_14-33](https://github.com/user-attachments/assets/b38e641d-6c4c-4cb9-b554-8c5afe0eafc3)
 
-作者为了解决这个问题,引入了位置编码:
+作者为了解决这个问题，引入了位置编码:
 
-$\gamma(p) = \left( \sin\left(2^0 \pi p\right), \cos\left(2^0 \pi p\right), \dots, \sin\left(2^{L-1} \pi p\right), \cos\left(2^{L-1} \pi p\right) \right)$
+$\gamma(p) = \left( \sin\left(2^0 \pi p\right)， \cos\left(2^0 \pi p\right)， \dots， \sin\left(2^{L-1} \pi p\right)， \cos\left(2^{L-1} \pi p\right) \right)$
 
-- p需要归一化[-1, 1]
-- 对于空间坐标**x**, L=10, $\gamma(X)\$ 是60D
-- 对于视角坐标**d**, L=4,  $\gamma(d)\$ 是24D
-- 在代码中,加上初始值: $\gamma(X)\$ 是63D, $\gamma(d)\$ 是27D
+- p需要归一化[-1， 1]
+- 对于空间坐标**x**， L=10， $\gamma(X)\$ 是60D
+- 对于视角坐标**d**， L=4，  $\gamma(d)\$ 是24D
+- 在代码中，加上初始值: $\gamma(X)\$ 是63D， $\gamma(d)\$ 是27D
 
 实际代码中的模型结构图:
 
 ```
 NeRF(
   (pts_linears): ModuleList(
-    (0): Linear(in_features=63, out_features=256, bias=True)
-    (1): Linear(in_features=256, out_features=256, bias=True)
-    (2): Linear(in_features=256, out_features=256, bias=True)
-    (3): Linear(in_features=256, out_features=256, bias=True)
-    (4): Linear(in_features=256, out_features=256, bias=True)
-    (5): Linear(in_features=319, out_features=256, bias=True)
-    (6): Linear(in_features=256, out_features=256, bias=True)
-    (7): Linear(in_features=256, out_features=256, bias=True)
+    (0): Linear(in_features=63， out_features=256， bias=True)
+    (1): Linear(in_features=256， out_features=256， bias=True)
+    (2): Linear(in_features=256， out_features=256， bias=True)
+    (3): Linear(in_features=256， out_features=256， bias=True)
+    (4): Linear(in_features=256， out_features=256， bias=True)
+    (5): Linear(in_features=319， out_features=256， bias=True)
+    (6): Linear(in_features=256， out_features=256， bias=True)
+    (7): Linear(in_features=256， out_features=256， bias=True)
   )
   (views_linears): ModuleList(
-    (0): Linear(in_features=283, out_features=128, bias=True)
+    (0): Linear(in_features=283， out_features=128， bias=True)
   )
-  (feature_linear): Linear(in_features=256, out_features=256, bias=True)
-  (alpha_linear): Linear(in_features=256, out_features=1, bias=True)
-  (rgb_linear): Linear(in_features=128, out_features=3, bias=True)
+  (feature_linear): Linear(in_features=256， out_features=256， bias=True)
+  (alpha_linear): Linear(in_features=256， out_features=1， bias=True)
+  (rgb_linear): Linear(in_features=128， out_features=3， bias=True)
 )
 ```
-到这里,我们就可以回答问题5了
+到这里，我们就可以回答问题5了
 
 ---
 
-好了,现在我们已经有了模型,我们要如何去计算这个模型的loss呢?
+好了，现在我们已经有了模型，我们要如何去计算这个模型的loss呢?
 <div style="text-align: center"><strong>问题6：如何去计算这个模型的loss？ </strong></div>
-回答:模型采用自监督的方式去计算loss,具体来说:
+回答:模型采用自监督的方式去计算loss，具体来说:
 
 - GT是图片某一像素的RGB
 - 将该像素对应光线上的粒子颜色进行求和
@@ -217,7 +234,7 @@ NeRF(
 - $\ L = \sum_{r \in R} \left\| \hat{C}(r) - C(r) \right\|_2^2 \$
 - R是每个batch的射线(1024条)
 
-到这里,我们就可以回答问题6了
+到这里，我们就可以回答问题6了
 
 ---
 
@@ -232,26 +249,26 @@ $$ \hat{C}(s) = \int_{0}^{+\infty} T(s) \sigma(s) C(s) \ ds $$
 
 $$ T(s) = e^{-\int_{0}^{s} \sigma(t) \ dt} $$
 
-- $\ T(s) \$:在s点之前,光线没有被阻碍的概率
-- $\ \sigma(s) \$:在s点处粒子的密度信息,密度越大,光线越有可能被阻拦
-- $\ C(s) \$:在s点处,粒子发出颜色光
-- 各点的颜色和概率密度已知,先求 $\ T(s) \$
+- $\ T(s) \$:在s点之前，光线没有被阻碍的概率
+- $\ \sigma(s) \$:在s点处粒子的密度信息，密度越大，光线越有可能被阻拦
+- $\ C(s) \$:在s点处，粒子发出颜色光
+- 各点的颜色和概率密度已知，先求 $\ T(s) \$
 
-上面这种情况是在连续情况下将一条射线上的粒子的颜色进行求和,但是计算机只能处理离散化的数据,所以下面我们需要将上面的公式进行离散化处理:
+上面这种情况是在连续情况下将一条射线上的粒子的颜色进行求和，但是计算机只能处理离散化的数据，所以下面我们需要将上面的公式进行离散化处理:
 
 离散化:
 
--  将光线[0, s]划分为N个等间距区间 $\ [T_n \rightarrow T_{n+1}] \$
--  n=0, 1, 2, ..., N
+-  将光线[0， s]划分为N个等间距区间 $\ [T_n \rightarrow T_{n+1}] \$
+-  n=0， 1， 2， ...， N
 -  间隔长度为 $\ \delta_n \$
 -  假设区间内密度 $$\ \sigma(n) \$$ 和颜色 $$\ C(n) \$$ 固定
 
 $$ \hat{C}(r) = \sum_{i=1}^{N} T_i \left(1 - e^{-\sigma_i \delta_i}\right) c_i $$
 $$ \text{where } T_i = e^{-\sum_{j=1}^{i-1} \sigma_j \delta_j} $$
 
-关于如何从连续的式子推出离散的式子,这里就不细说了
+关于如何从连续的式子推出离散的式子，这里就不细说了
 
-然后在实际的代码实现中,还需要往前继续化简一步:
+然后在实际的代码实现中，还需要往前继续化简一步:
 
 $\ \hat{C} = \sum_{n=0}^{N} C_n \ e^{-\sum_{i=0}^{n} \sigma_i \delta_i} \left(1 - e^{-\sigma_n \delta_n}\right)  \$
 
@@ -299,19 +316,19 @@ $$\hat{C}(r) = \sum_{n=0}^{N} W_n C_n$$
 
 - 这样累加的结果就是光线最终看到的颜色。
 
-到这里,我们就可以回答问题7和问题2了
+到这里，我们就可以回答问题7和问题2了
 
 ---
 
 现在我们还有一个问题没有解决
-<div style="text-align: center"><strong>问题8：在前面我们都是对光线进行均匀的采样,但是空间中会存在很多的无效区域,我们希望在无效区域少采样/不采样,在有效区域要多采样,这个问题要怎么解决? </strong></div>
+<div style="text-align: center"><strong>问题8：在前面我们都是对光线进行均匀的采样，但是空间中会存在很多的无效区域，我们希望在无效区域少采样/不采样，在有效区域要多采样，这个问题要怎么解决? </strong></div>
 
-回答:可以通过粗模型输出得到一个概率,然后通过这个概率去重新在这条光线上进行采样128个粒子,与之前的64个粒子加在一起,即每条光线采样192个粒子
+回答:可以通过粗模型输出得到一个概率，然后通过这个概率去重新在这条光线上进行采样128个粒子，与之前的64个粒子加在一起，即每条光线采样192个粒子
 
 - 可以根据概率密度进行再次采样
 - 由两个模型组成
-- 粗模型:输入均匀采样粒子,输出密度
-- 细模型:根据密度,二次采样
+- 粗模型:输入均匀采样粒子，输出密度
+- 细模型:根据密度，二次采样
 - 最后输出:采用模型2的输出
 - 粗模型和细模型结构相同
 
@@ -319,8 +336,8 @@ $$\hat{C}(r) = \sum_{n=0}^{N} W_n C_n$$
 
 已知条件
 
-- bins（位置）：[0.0, 1.0, 2.0, 3.0, 4.0]
-- weights（权重）：[0.1, 0.2, 0.4, 0.15, 0.15]
+- bins（位置）：[0.0， 1.0， 2.0， 3.0， 4.0]
+- weights（权重）：[0.1， 0.2， 0.4， 0.15， 0.15]
 
 我们希望在这些位置上重新采样，并将采样集中在权重较高的位置。
 
@@ -328,17 +345,17 @@ $$\hat{C}(r) = \sum_{n=0}^{N} W_n C_n$$
 
 首先，将权重归一化以得到 PDF。这个例子中的权重已经是归一化的（总和为 1），所以 PDF 和权重相同：
 
-$$PDF=[0.1,0.2,0.4,0.15,0.15]$$
+$$PDF=[0.1，0.2，0.4，0.15，0.15]$$
 
 **步骤 2：计算CDF（累积分布函数）**
 
 接下来，我们计算 CDF，即 PDF 的累加和：
 
-$$CDF=[0.1,0.3,0.7,0.85,1.0]$$
+$$CDF=[0.1，0.3，0.7，0.85，1.0]$$
 
 **步骤 3：生成随机数并找到对应的CDF区间**
 
-假设我们希望采样 2 个点，因此生成 2 个均匀分布在[0, 1]之间的随机数：
+假设我们希望采样 2 个点，因此生成 2 个均匀分布在[0， 1]之间的随机数：
 
 - 随机数 $u_1=0.25$
 - 随机数 $u_2=0.8$
@@ -347,13 +364,13 @@ $$CDF=[0.1,0.3,0.7,0.85,1.0]$$
 
 对于随机数 $u_1=0.25$ :
 
-- 查看CDF列表，发现0.25落在CDF[0.1,0.3]区间内，对应的bins区间是[0.0, 1.0]
-- 所以， $u_1=0.25$ 对应的bins区间是[0.0, 1.0]。
+- 查看CDF列表，发现0.25落在CDF[0.1，0.3]区间内，对应的bins区间是[0.0， 1.0]
+- 所以， $u_1=0.25$ 对应的bins区间是[0.0， 1.0]。
 
 对于随机数 $u_2=0.8$ :
 
-- 查看CDF列表，发现0.8落在 CDF[0.7,0.85]区间内，对应的bins区间是[2.0, 3.0]
-- 所以, $u_2=0.8$​ 对应的 bins 区间是 [2.0, 3.0]。
+- 查看CDF列表，发现0.8落在 CDF[0.7，0.85]区间内，对应的bins区间是[2.0， 3.0]
+- 所以， $u_2=0.8$​ 对应的 bins 区间是 [2.0， 3.0]。
 
 **步骤 4：插值计算采样位置**
 
@@ -388,19 +405,19 @@ $$\text{sample}_2 = \text{bins}[i] + t \times (\text{bins}[i+1] - \text{bins}[i]
 - $sample_1=0.75$
 - $sample_2=2.6667$
 
-到这里,我们就可以回答问题8了
+到这里，我们就可以回答问题8了
 
 ---
 
 **最后我们再来看看模型是怎么进行推理的**
 
-假设我们输入的图像是400*400的,则一共会有400*400条光线,即:
+假设我们输入的图像是400 * 400的，则一共会有400 * 400条光线，即:
 
 输入:
-- 400*400条光线上分别采样64个点
+- 400 * 400条光线上分别采样64个点
 
 输出:
-- [400 * 400 * 192, 4]
+- [400 * 400 * 192， 4]
 - 进行体渲染
 
 ![clipboard_2024-10-27_14-27](https://github.com/user-attachments/assets/c26f7df5-f62f-421e-81cb-074ef8478d42)
@@ -418,18 +435,18 @@ $$\text{sample}_2 = \text{bins}[i] + t \times (\text{bins}[i+1] - \text{bins}[i]
 - 位置坐标为 63D 和方向向量为 27D。
 
 **模型1:**
-- 8层MLP,
-- 输入为(batch_size, 64, 63)和(batch_size, 64, 27)
-- 输出为(batch_size, 64, 4)
+- 8层MLP，
+- 输入为(batch_size， 64， 63)和(batch_size， 64， 27)
+- 输出为(batch_size， 64， 4)
 
 **后处理1:**
 - 计算模型1的输出，对射线进行二次采样；
 - 每条射线上共采样192个粒子。
 
 **模型2:**
-- 8层MLP,
-- 输入为(batch_size, 192, 63)和(batch_size, 192, 27)
-- 输出为(batch_size, 192, 4)
+- 8层MLP，
+- 输入为(batch_size， 192， 63)和(batch_size， 192， 27)
+- 输出为(batch_size， 192， 4)
 
 **后处理2:**
 - 将模型 2 输出通过体渲染，转换为像素。
