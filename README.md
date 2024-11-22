@@ -1,6 +1,6 @@
 # NeRF_Replication
 
-**本仓库是在[yenchenlin/nerf-pytorch](https://github.com/yenchenlin/nerf-pytorch)的基础上，将NeRF作者原有的工作重构出一个最小化实现的版本，以加深理解**
+**本仓库是在[手写Nerf](https://www.bilibili.com/video/BV1xL411y7Qa/?vd_source=1a02178b1644ddc9b579739c3c1616b4)的基础上，将NeRF作者原有的工作重构出一个最小化实现的版本，以加深理解**
 
 ## 参考项目
 https://github.com/yenchenlin/nerf-pytorch
